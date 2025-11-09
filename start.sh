@@ -20,6 +20,35 @@ if [ -f docker-compose.yml ]; then
   fi
 fi
 
+# If prebuilt jars exist and java is available, run them directly (useful in environments without mvn/docker)
+if command -v java >/dev/null 2>&1; then
+  SERVER_JAR="$(ls serverapp/target/*.jar 2>/dev/null | head -n 1 || true)"
+  CLIENT_JAR="$(ls clientapp/target/*.jar 2>/dev/null | head -n 1 || true)"
+
+  if [ -n "$SERVER_JAR" ] || [ -n "$CLIENT_JAR" ]; then
+    echo "Found runnable jars - will start available services using java"
+
+    if [ -n "$SERVER_JAR" ]; then
+      echo "Starting server from $SERVER_JAR"
+      nohup java $JAVA_OPTS -jar "$SERVER_JAR" > server.log 2>&1 &
+      echo "Server started (logs -> server.log)"
+    else
+      echo "No server jar found in serverapp/target"
+    fi
+
+    if [ -n "$CLIENT_JAR" ]; then
+      echo "Starting client app from $CLIENT_JAR"
+      nohup java $JAVA_OPTS -jar "$CLIENT_JAR" > client.log 2>&1 &
+      echo "Client started (logs -> client.log)"
+    else
+      echo "No client jar found in clientapp/target"
+    fi
+
+    echo "All available jars started. Use 'tail -f server.log' or 'tail -f client.log' to follow logs."
+    exit 0
+  fi
+fi
+
 # Fallback: build and run each module locally using Maven and java
 if command -v mvn >/dev/null 2>&1; then
   echo "Building serverapp..."
