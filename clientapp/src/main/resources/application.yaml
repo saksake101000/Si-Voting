@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: clientapp
+  thymeleaf:
+    cache: false
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java,src/main/resources
+    livereload:
+      enabled: true
+
+server:
+  port: 8081
+  servlet:
+    session:
+      tracking-modes: cookie
+      cookie:
+        http-only: true
+        secure: false
+        same-site: lax
+
+# Backend API Configuration
+api:
+  base-url: http://localhost:8080/api
+
+google:
+  client-id: 854276108459-1hq2iv8d91ls100bgf88k5g7fp04nq0c.apps.googleusercontent.com

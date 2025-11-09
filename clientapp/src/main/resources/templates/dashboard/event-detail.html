@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{dashboard/layout :: layout(${event.title != null ? event.title + ' - SI-VOTING' : 'Detail Event - SI-VOTING'}, 'my-events', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="glass rounded-3xl p-8 shadow-xl space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div class="space-y-4">
+                <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-primary/70 font-semibold">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-normal tracking-normal">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Detail Event
+                    </span>
+                    <span th:if="${event.code != null}" class="px-3 py-1 rounded-full bg-secondary/10 text-secondary font-semibold tracking-widest" th:text="${event.code}">CODE</span>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-primary" th:text="${event.title}">Judul Event</h1>
+                <p class="text-slate-600 leading-relaxed" th:text="${event.description != null ? event.description : 'Tidak ada deskripsi untuk event ini.'}">
+                    Deskripsi event
+                </p>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                    <div class="inline-flex items-center gap-2">
+                        <i class="fa-solid fa-user-circle text-primary"></i>
+                        <span th:text="${event.createdByName != null ? event.createdByName : (event.createdBy != null ? 'Organizer #' + event.createdBy : 'Penyelenggara')}">Admin SI-VOTING</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-primary"></i>
+                        <span th:text="${event.startDateFormatted != null && event.endDateFormatted != null ? event.startDateFormatted + ' - ' + event.endDateFormatted + ' WIB' : (event.startDateFormatted != null ? event.startDateFormatted + ' WIB' : '-')}">Jadwal</span>
+                    </div>
+                    <span id="eventStatus" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold"
+                          th:classappend=" ${event.timelineStatus != null ? '' : (event.isActive ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700')}"
+                          th:text="${event.timelineStatus != null ? event.timelineStatus : (event.isActive ? 'Sedang Berjalan' : 'Tidak Aktif')}">Status</span>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3">
+                <a th:href="@{/dashboard/join}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/20 text-sm font-semibold text-primary hover:bg-primary/10 transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Kembali ke Join</span>
+                </a>
+                <a th:href="@{/my-events}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/20 text-sm font-semibold text-primary hover:bg-primary/10 transition">
+                    <i class="fa-solid fa-calendar"></i>
+                    <span>Lihat Event Saya</span>
+                </a>
+            </div>
+        </div>
+
+        <div id="votedAlert" th:classappend=" ${hasVoted ? '' : ' hidden'}" class="rounded-2xl border border-secondary/40 bg-secondary/10 p-4 flex items-center gap-3">
+            <i class="fa-solid fa-check-circle text-secondary text-xl"></i>
+            <div>
+                <p class="font-semibold text-primary">Anda sudah memberikan suara!</p>
+                <p class="text-xs text-slate-500">Terima kasih telah berpartisipasi dalam event ini.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass rounded-3xl p-6 shadow">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <span class="text-3xl font-bold text-primary" th:text="${totalVoters != null ? totalVoters : 0}" id="totalVoters">0</span>
+            </div>
+            <p class="text-sm text-slate-500 font-semibold">Total Pemilih</p>
+        </div>
+        <div class="glass rounded-3xl p-6 shadow">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                </div>
+                <span class="text-3xl font-bold text-secondary" th:text="${totalVotes != null ? totalVotes : 0}" id="totalVotes">0</span>
+            </div>
+            <p class="text-sm text-slate-500 font-semibold">Total Suara</p>
+        </div>
+        <div class="glass rounded-3xl p-6 shadow">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <span class="text-3xl font-bold text-primary" th:text="${participationRate != null ? participationRate + '%' : '0%'}" id="participationRate">0%</span>
+            </div>
+            <p class="text-sm text-slate-500 font-semibold">Tingkat Partisipasi</p>
+        </div>
+    </section>
+
+    <section class="space-y-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold text-primary">Daftar Kandidat</h2>
+                <p class="text-slate-500 text-sm">Pilih kandidat favoritmu dan pantau perolehan suara secara real-time.</p>
+            </div>
+            <div th:if="${success}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 text-sm font-semibold">
+                <i class="fa-solid fa-circle-check"></i>
+                <span th:text="${success}">Berhasil</span>
+            </div>
+            <div th:if="${error}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-sm font-semibold">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span th:text="${error}">Gagal</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="candidatesList">
+            <div th:if="${candidates == null or #lists.isEmpty(candidates)}" class="col-span-full glass rounded-3xl p-10 text-center text-slate-500">
+                <i class="fa-solid fa-users-slash text-4xl text-slate-300 mb-4"></i>
+                <p>Belum ada kandidat yang tersedia.</p>
+            </div>
+
+            <div th:each="candidate : ${candidates}"
+                 th:with="votes=${candidateVotes[candidate.id] != null ? candidateVotes[candidate.id] : 0},
+                          percentage=${totalVotes > 0 ? (votes * 100.0) / totalVotes : 0.0},
+                          percentageValue=${percentage >= 0 ? percentage : 0},
+                          percentageText=${T(java.lang.String).format('%.1f', percentageValue)},
+                          isChosen=${hasVoted and userVoteCandidateId != null and userVoteCandidateId.equals(candidate.id)}"
+                 class="glass rounded-3xl p-6 shadow hover:shadow-lg transition-all"
+                 th:classappend=" ${hasVoted ? ' opacity-85' : ''}">
+                <div class="flex items-start gap-4 mb-4">
+                    <div th:if="${candidate.photoUrl != null and !#strings.isEmpty(candidate.photoUrl)}" class="rounded-full w-16 h-16 overflow-hidden border-2 border-white shadow-md flex-shrink-0">
+                        <img th:src="${candidate.photoUrl}" th:alt="${candidate.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div th:unless="${candidate.photoUrl != null and !#strings.isEmpty(candidate.photoUrl)}" class="bg-gradient-to-br from-primary to-secondary rounded-full w-16 h-16 flex items-center justify-center text-2xl text-white flex-shrink-0 font-semibold">
+                        <span th:text="${#strings.substring(candidate.name,0,1).toUpperCase()}">K</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-primary mb-1" th:text="${candidate.name}">Nama Kandidat</h3>
+                        <p class="text-slate-600 text-sm" th:text="${candidate.description != null ? candidate.description : 'Belum ada deskripsi.'}">Deskripsi kandidat</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-semibold text-slate-500">Suara</span>
+                        <span class="text-sm font-bold text-primary"
+                              th:text="${votes} + ' (' + percentageText + '%)'"></span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                        <div class="h-full rounded-full bg-primary transition-all duration-300"
+                             th:style="${'width:' + percentageValue + '%'}"></div>
+                    </div>
+                </div>
+
+                <div th:if="${hasVoted}" class="text-xs font-semibold flex items-center gap-2"
+                     th:classappend=" ${isChosen ? ' text-emerald-600' : ' text-slate-400'}">
+                    <i class="fa-solid" th:classappend="${isChosen ? ' fa-check' : ' fa-circle'}"></i>
+                    <span th:text="${isChosen ? 'Suara Anda' : 'Tidak dipilih'}">Status</span>
+                </div>
+
+                <button th:if="${!hasVoted}" type="button" class="w-full py-3 mt-3 rounded-xl font-semibold bg-primary text-white hover:bg-primary/90 transition flex items-center justify-center gap-2"
+                        th:attr="data-candidate-id=${candidate.id}, data-candidate-name=${candidate.name}"
+                        onclick="openConfirmModal(this)">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                    Vote
+                </button>
+
+                <button th:if="${hasVoted}" type="button" class="w-full py-3 mt-3 rounded-xl font-semibold bg-slate-200 text-slate-500 cursor-not-allowed flex items-center justify-center gap-2">
+                    <i class="fa-solid" th:classappend="${isChosen ? ' fa-check' : ' fa-ban'}"></i>
+                    <span th:text="${isChosen ? 'Sudah Anda Pilih' : 'Voting Ditutup'}">Sudah Vote</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div id="confirmModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 px-4">
+        <div class="glass relative rounded-3xl p-8 w-full max-w-md shadow-2xl">
+            <button id="closeConfirmModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center text-3xl text-primary">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-primary mb-2">Konfirmasi Suara</h3>
+                <p class="text-slate-500">Apakah Anda yakin ingin memilih:</p>
+                <p class="text-lg font-bold text-primary mt-2" id="selectedCandidateName">-</p>
+            </div>
+            <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 mb-6 text-sm text-amber-700">
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-exclamation-triangle mt-1"></i>
+                    <div>
+                        <p class="font-semibold">Peringatan!</p>
+                        <p class="text-xs">Anda hanya dapat memilih 1 kali dalam event ini. Pastikan pilihan Anda sudah tepat.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancelVote" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition">Batal</button>
+                <button id="confirmVote" class="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition">
+                    <i class="fa-solid fa-check mr-2"></i>Konfirmasi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="successModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 px-4">
+        <div class="glass rounded-3xl p-8 w-full max-w-md shadow-2xl text-center">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center text-3xl text-emerald-600">
+                <i class="fa-solid fa-check-circle"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-primary mb-2">Vote Berhasil!</h3>
+            <p class="text-slate-500 mb-6">Suara Anda telah tercatat. Terima kasih atas partisipasinya!</p>
+            <button id="closeSuccessModal" class="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition">Tutup</button>
+        </div>
+    </div>
+
+    <form id="voteForm" th:action="@{/votes}" method="post">
+        <input type="hidden" name="candidateId" id="voteCandidateId">
+        <input type="hidden" name="eventId" th:value="${event.id}">
+        <input type="hidden" name="eventCode" th:value="${event.code}">
+    </form>
+
+    <!-- SockJS and STOMP for WebSocket -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let selectedCandidateButton;
+        let stompClient = null;
+        const eventId = /*[[${event.id}]]*/ null;
+        
+        // WebSocket Connection Status
+        const wsStatus = {
+            CONNECTING: 'CONNECTING',
+            CONNECTED: 'CONNECTED',
+            DISCONNECTED: 'DISCONNECTED',
+            ERROR: 'ERROR'
+        };
+        let currentWsStatus = wsStatus.DISCONNECTED;
+
+        // Connect to WebSocket
+        function connectWebSocket() {
+            if (eventId === null || eventId === undefined) {
+                console.error('❌ Cannot connect WebSocket: Event ID is null');
+                return;
+            }
+
+            try {
+                currentWsStatus = wsStatus.CONNECTING;
+                console.log('🔄 Connecting to WebSocket...');
+                
+                const socket = new SockJS('http://localhost:8080/ws');
+                stompClient = Stomp.over(socket);
+                
+                // Disable debug logs (optional - set to console.log to enable)
+                stompClient.debug = null;
+                
+                stompClient.connect({}, function(frame) {
+                    currentWsStatus = wsStatus.CONNECTED;
+                    console.log('✅ WebSocket Connected:', frame);
+                    
+                    // Subscribe to event-specific updates
+                    stompClient.subscribe('/topic/event/' + eventId, function(message) {
+                        try {
+                            const voteUpdate = JSON.parse(message.body);
+                            console.log('📨 Vote update received:', voteUpdate);
+                            
+                            // Update UI in real-time
+                            updateVoteDisplay(voteUpdate);
+                            
+                            // Show notification
+                            showVoteNotification(voteUpdate);
+                        } catch (error) {
+                            console.error('❌ Error parsing vote update:', error);
+                        }
+                    });
+                    
+                    console.log('📡 Subscribed to: /topic/event/' + eventId);
+                    
+                }, function(error) {
+                    currentWsStatus = wsStatus.ERROR;
+                    console.error('❌ WebSocket connection error:', error);
+                    
+                    // Auto-reconnect after 5 seconds
+                    console.log('🔄 Reconnecting in 5 seconds...');
+                    setTimeout(connectWebSocket, 5000);
+                });
+                
+            } catch (error) {
+                currentWsStatus = wsStatus.ERROR;
+                console.error('❌ Failed to establish WebSocket connection:', error);
+                setTimeout(connectWebSocket, 5000);
+            }
+        }
+
+        // Disconnect WebSocket
+        function disconnectWebSocket() {
+            if (stompClient !== null && currentWsStatus === wsStatus.CONNECTED) {
+                stompClient.disconnect(function() {
+                    currentWsStatus = wsStatus.DISCONNECTED;
+                    console.log('🔌 Disconnected from WebSocket');
+                });
+            }
+        }
+
+        // Update vote display in real-time
+        function updateVoteDisplay(voteUpdate) {
+            // Find candidate card
+            const candidateCards = document.querySelectorAll('#candidatesList > div');
+            
+            candidateCards.forEach(card => {
+                const voteButton = card.querySelector('button[data-candidate-id]');
+                if (!voteButton) return;
+                
+                const cardCandidateId = parseInt(voteButton.getAttribute('data-candidate-id'));
+                
+                if (cardCandidateId === voteUpdate.candidateId) {
+                    // Update vote count and percentage
+                    const voteCountSpan = card.querySelector('.text-primary.font-bold');
+                    const progressBar = card.querySelector('.bg-primary.transition-all');
+                    
+                    if (voteCountSpan && progressBar) {
+                        // Calculate new percentage
+                        const newPercentage = voteUpdate.totalVotes > 0 
+                            ? ((voteUpdate.voteCount * 100) / voteUpdate.totalVotes).toFixed(1)
+                            : 0;
+                        
+                        // Animate update
+                        voteCountSpan.classList.add('pulse-animation');
+                        voteCountSpan.textContent = voteUpdate.voteCount + ' (' + newPercentage + '%)';
+                        progressBar.style.width = newPercentage + '%';
+                        
+                        setTimeout(() => {
+                            voteCountSpan.classList.remove('pulse-animation');
+                        }, 1000);
+                    }
+                }
+            });
+            
+            // Update total votes in statistics section
+            const totalVotesElement = document.getElementById('totalVotes');
+            if (totalVotesElement && voteUpdate.totalVotes !== undefined) {
+                totalVotesElement.classList.add('pulse-animation');
+                totalVotesElement.textContent = voteUpdate.totalVotes;
+                setTimeout(() => {
+                    totalVotesElement.classList.remove('pulse-animation');
+                }, 1000);
+            }
+        }
+
+        // Show vote notification
+        function showVoteNotification(voteUpdate) {
+            // Create notification toast
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 z-50 glass rounded-2xl p-4 shadow-2xl flex items-center gap-3 min-w-[300px] animate-slide-in';
+            notification.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-bold text-sm text-primary">Vote Baru!</p>
+                    <p class="text-xs text-slate-600">${voteUpdate.candidateName} (+1 suara)</p>
+                </div>
+                <button class="text-slate-400 hover:text-slate-600" onclick="this.parentElement.remove()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Modal functions
+        function openConfirmModal(button) {
+            const candidateName = button.getAttribute('data-candidate-name');
+            const candidateId = button.getAttribute('data-candidate-id');
+            selectedCandidateButton = button;
+
+            document.getElementById('selectedCandidateName').textContent = candidateName;
+            document.getElementById('voteCandidateId').value = candidateId;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmModal').classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            document.getElementById('confirmModal').classList.remove('flex');
+            selectedCandidateButton = null;
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+        }
+
+        // Event listeners
+        document.getElementById('confirmVote').addEventListener('click', () => {
+            const form = document.getElementById('voteForm');
+            if (form && document.getElementById('voteCandidateId').value) {
+                form.submit();
+            }
+        });
+
+        document.getElementById('closeConfirmModal').addEventListener('click', closeConfirmModal);
+        document.getElementById('cancelVote').addEventListener('click', closeConfirmModal);
+        document.getElementById('closeSuccessModal').addEventListener('click', closeSuccessModal);
+
+        document.getElementById('confirmModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('confirmModal')) {
+                closeConfirmModal();
+            }
+        });
+
+        document.getElementById('successModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('successModal')) {
+                closeSuccessModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('confirmModal').classList.contains('hidden')) {
+                    closeConfirmModal();
+                }
+                if (!document.getElementById('successModal').classList.contains('hidden')) {
+                    closeSuccessModal();
+                }
+            }
+        });
+
+        // Auto-connect WebSocket on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Event Detail Page Loaded - Initializing WebSocket...');
+            connectWebSocket();
+        });
+
+        // Disconnect on page unload
+        window.addEventListener('beforeunload', function() {
+            console.log('👋 Page unloading - Disconnecting WebSocket...');
+            disconnectWebSocket();
+        });
+
+        // Reconnect if connection lost (heartbeat check)
+        setInterval(function() {
+            if (currentWsStatus !== wsStatus.CONNECTED && currentWsStatus !== wsStatus.CONNECTING) {
+                console.log('💔 Connection lost - Attempting to reconnect...');
+                connectWebSocket();
+            }
+        }, 10000); // Check every 10 seconds
+        
+        /*]]>*/
+    </script>
+
+    <style>
+        .pulse-animation {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+            }
+            50% { 
+                transform: scale(1.15); 
+                color: #10B981;
+                font-weight: 900;
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</th:block>
+</html>

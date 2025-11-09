@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{dashboard/layout :: layout('Riwayat Voting', 'voted', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="glass rounded-3xl p-6 shadow-lg">
+        <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold">Riwayat Voting</h2>
+            <a href="/dashboard" class="text-sm text-primary">Kembali ke Dashboard</a>
+        </div>
+
+        <div class="mt-6">
+            <div th:if="${events == null or #lists.isEmpty(events)}" class="text-center text-slate-500 py-8">
+                <i class="fa-solid fa-inbox text-4xl text-slate-300 mb-3"></i>
+                <p>Belum ada riwayat voting</p>
+            </div>
+
+            <div th:each="event : ${events}" class="border rounded-2xl p-4 mb-4 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <a th:href="@{'/events/' + ${event.code}}" class="font-semibold text-lg text-primary" th:text="${event.title}">Event Title</a>
+                        <p class="text-sm text-slate-500" th:text="${event.code}">CODE1234</p>
+                    </div>
+                    <div class="text-sm text-slate-400">
+                        <p th:text="${event.startDate != null ? #temporals.format(event.startDate, 'dd MMM yyyy') : ''}">--</p>
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-slate-600">
+                    <p th:text="${event.description}">Event description...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</th:block>
+</html>

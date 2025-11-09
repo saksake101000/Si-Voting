@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./serverapp
+    container_name: final-serverapp
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - sivoting-net
+
+  client:
+    build: ./clientapp
+    container_name: final-clientapp
+    ports:
+      - "8081:8081"
+    environment:
+      - API_BASE=http://server:8080/api
+      - PORT=8081
+    depends_on:
+      - server
+    networks:
+      - sivoting-net
+
+networks:
+  sivoting-net:
+    driver: bridge

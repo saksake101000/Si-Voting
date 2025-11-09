@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Daftar Akun Baru - SI-VOTING</title>
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .color-primary { background-color: #48bb78; }
+        .color-primary-text { color: #48bb78; }
+        .shadow-voting { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05); }
+        .input-focus:focus {
+            border-color: #48bb78;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="bg-white p-8 md:p-10 rounded-2xl shadow-voting w-full max-w-md transition-transform duration-300 hover:scale-[1.01]">
+        
+        <div class="text-center mb-8">
+            <span class="text-3xl font-bold color-primary-text mb-1">
+                SI-VOTING
+            </span>
+            <h2 class="text-2xl font-bold text-gray-800 mt-2">
+                Daftar Akun Baru
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Ayo bergabung dan mulai kelola event voting Anda!
+            </p>
+        </div>
+
+        <!-- Success Message -->
+        <div th:if="${success}" class="mb-6 rounded-lg bg-green-50 border-2 border-green-200 px-4 py-3 flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-green-800" th:text="${success}">Success message</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="mb-6 rounded-lg bg-red-50 border-2 border-red-200 px-4 py-3 flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-red-800" th:text="${error}">Error message</p>
+            </div>
+        </div>
+
+    <form th:action="@{/register}" method="post" class="space-y-4" id="registerForm">
+            
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                    Username
+                </label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Pilih nama pengguna unik"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 input-focus transition duration-150 ease-in-out" />
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                </label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="Contoh: nama@domain.com"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 input-focus transition duration-150 ease-in-out" />
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                </label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Minimal 6 karakter" minlength="6"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 input-focus transition duration-150 ease-in-out" />
+                <p id="passwordError" class="text-xs text-gray-500 mt-1">Password minimal 6 karakter</p>
+            </div>
+            
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                    Konfirmasi Password
+                </label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required 
+                       placeholder="Ulangi sandi Anda" minlength="6"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 input-focus transition duration-150 ease-in-out" />
+                <p id="confirmError" class="text-sm text-red-600 mt-2 hidden">
+                    <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    Password dan konfirmasi tidak cocok
+                </p>
+            </div>
+            
+            <div class="pt-4">
+                <button type="submit" id="registerBtn"
+                        class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-base font-semibold text-white color-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btnText">Daftar Sekarang</span>
+                    <span id="btnIcon" class="ml-2" role="img" aria-label="Checkmark">✅</span>
+                    <span id="btnLoading" class="ml-2 hidden">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+
+        <script>
+            // Form elements
+            const form = document.getElementById('registerForm');
+            const username = document.getElementById('username');
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const confirmError = document.getElementById('confirmError');
+            const passwordError = document.getElementById('passwordError');
+            const registerBtn = document.getElementById('registerBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnLoading = document.getElementById('btnLoading');
+
+            // Real-time password match validation
+            confirmPassword.addEventListener('input', function() {
+                if (confirmPassword.value && password.value !== confirmPassword.value) {
+                    confirmError.classList.remove('hidden');
+                    confirmPassword.classList.add('border-red-500');
+                    confirmPassword.classList.remove('border-gray-300');
+                } else {
+                    confirmError.classList.add('hidden');
+                    confirmPassword.classList.remove('border-red-500');
+                    confirmPassword.classList.add('border-gray-300');
+                }
+            });
+
+            // Password length validation
+            password.addEventListener('input', function() {
+                if (password.value.length > 0 && password.value.length < 6) {
+                    passwordError.classList.add('text-red-600');
+                    passwordError.classList.remove('text-gray-500');
+                    password.classList.add('border-red-500');
+                    password.classList.remove('border-gray-300');
+                } else {
+                    passwordError.classList.remove('text-red-600');
+                    passwordError.classList.add('text-gray-500');
+                    password.classList.remove('border-red-500');
+                    password.classList.add('border-gray-300');
+                }
+            });
+
+            // Form submission with validation
+            form.addEventListener('submit', function(e) {
+                // Check if passwords match
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    confirmError.classList.remove('hidden');
+                    confirmPassword.focus();
+                    return;
+                }
+
+                // Check password length
+                if (password.value.length < 6) {
+                    e.preventDefault();
+                    passwordError.textContent = 'Password harus minimal 6 karakter';
+                    passwordError.classList.add('text-red-600');
+                    password.focus();
+                    return;
+                }
+
+                // Check username length
+                if (username.value.length < 3) {
+                    e.preventDefault();
+                    alert('Username harus minimal 3 karakter');
+                    username.focus();
+                    return;
+                }
+
+                // Show loading state
+                registerBtn.disabled = true;
+                btnText.textContent = 'Mendaftar...';
+                btnIcon.classList.add('hidden');
+                btnLoading.classList.remove('hidden');
+            });
+
+            // Auto-hide success/error messages after 5 seconds
+            window.addEventListener('DOMContentLoaded', function() {
+                const successMsg = document.querySelector('.bg-green-50');
+                const errorMsg = document.querySelector('.bg-red-50');
+                
+                if (successMsg) {
+                    setTimeout(() => {
+                        successMsg.style.transition = 'opacity 0.5s';
+                        successMsg.style.opacity = '0';
+                        setTimeout(() => successMsg.remove(), 500);
+                    }, 5000);
+                }
+                
+                if (errorMsg) {
+                    setTimeout(() => {
+                        errorMsg.style.transition = 'opacity 0.5s';
+                        errorMsg.style.opacity = '0';
+                        setTimeout(() => errorMsg.remove(), 500);
+                    }, 5000);
+                }
+            });
+        </script>
+
+        <p class="mt-6 text-center text-sm">
+            Sudah punya akun? 
+            <a th:href="@{/login}" class="font-semibold color-primary-text hover:text-green-600 transition duration-150 ease-in-out">
+                Masuk di sini
+            </a>
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<header class="glass flex items-center justify-between gap-4 p-4 lg:hidden shadow-md"
+        xmlns:th="http://www.thymeleaf.org"
+        th:fragment="header">
+    <button id="sidebarToggle" class="p-3 rounded-xl border border-slate-200 hover:border-primary hover:text-primary transition">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="text-center flex-1">
+        <p class="text-[10px] uppercase text-primary/70 tracking-[0.3em]">Dashboard</p>
+        <p class="text-lg font-logo text-primary">SI-VOTING</p>
+    </div>
+    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center font-semibold text-sm"
+         th:text="${username != null ? #strings.substring(username,0,1).toUpperCase() : 'U'}">U</div>
+</header>

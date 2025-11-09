@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{dashboard/layout :: layout('Event Saya - SI-VOTING', 'my-events', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="glass rounded-3xl p-8 shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-3xl md:text-4xl font-bold text-primary">Event Saya</h2>
+                <button onclick="window.location.href='/create-event'"
+                        class="bg-gradient-to-br from-primary to-accent text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Buat Event Baru</span>
+                </button>
+            </div>
+            <p class="text-slate-600">Kelola dan pantau semua event yang Anda buat.</p>
+        </div>
+    </section>
+
+    <div th:if="${success}" class="glass rounded-2xl p-4 border-l-4 border-green-500 bg-green-50/50">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-check-circle text-green-600 text-xl"></i>
+            <p class="text-green-800 font-semibold" th:text="${success}">Berhasil</p>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="glass rounded-2xl p-4 border-l-4 border-red-500 bg-red-50/50">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-exclamation-circle text-red-600 text-xl"></i>
+            <p class="text-red-800 font-semibold" th:text="${error}">Gagal</p>
+        </div>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div th:if="${events == null or #lists.isEmpty(events)}" class="col-span-full glass rounded-3xl p-12 shadow-lg text-center">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                <i class="fa-solid fa-calendar-xmark text-4xl text-primary/50"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-700 mb-3">Belum Ada Event</h3>
+            <p class="text-slate-500 mb-6">Anda belum membuat event apapun. Mulai buat event pertama Anda sekarang!</p>
+            <button onclick="window.location.href='/create-event'"
+                    class="inline-flex items-center gap-2 bg-gradient-to-br from-primary to-accent text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition">
+                <i class="fa-solid fa-plus"></i>
+                <span>Buat Event Baru</span>
+            </button>
+        </div>
+
+        <article th:each="event : ${events}" class="glass rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all hover:scale-[1.01] border border-white/60">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span th:if="${event.isActive}" class="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+                        <i class="fa-solid fa-check-circle mr-1"></i>Aktif
+                    </span>
+                    <span th:unless="${event.isActive}" class="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-gray-500 to-slate-500 text-white">
+                        <i class="fa-solid fa-pause-circle mr-1"></i>Nonaktif
+                    </span>
+                    <span th:if="${event.isPublic}" class="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                        <i class="fa-solid fa-globe mr-1"></i>Publik
+                    </span>
+                    <span th:unless="${event.isPublic}" class="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-orange-500 to-amber-500 text-white">
+                        <i class="fa-solid fa-lock mr-1"></i>Privat
+                    </span>
+                </div>
+                <div class="relative">
+                    <button type="button" class="p-2 hover:bg-slate-100 rounded-lg transition" data-event-menu-button>
+                        <i class="fa-solid fa-ellipsis-vertical text-slate-600"></i>
+                    </button>
+                    <div class="hidden absolute right-0 top-full mt-2 w-48 glass rounded-xl shadow-xl border border-white/60 py-2 z-10" data-event-menu>
+                        <a th:href="@{/events/{code}(code=${event.code})}" class="flex items-center gap-3 px-4 py-2 hover:bg-slate-100/80 transition text-slate-700">
+                            <i class="fa-solid fa-eye text-primary"></i>
+                            <span>Lihat Detail</span>
+                        </a>
+                        <a th:href="@{/events/edit/{id}(id=${event.id})}" class="flex items-center gap-3 px-4 py-2 hover:bg-slate-100/80 transition text-slate-700">
+                            <i class="fa-solid fa-edit text-blue-600"></i>
+                            <span>Edit Event</span>
+                        </a>
+            <button type="button"
+                class="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 transition text-red-600"
+                data-delete-button
+                th:attr="data-event-id=${event.id}, data-event-title=${event.title}">
+                            <i class="fa-solid fa-trash"></i>
+                            <span>Hapus Event</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold text-primary mb-2 line-clamp-2" th:text="${event.title}">Event Title</h3>
+            <p class="text-sm text-slate-600 mb-4 line-clamp-3" th:text="${event.description ?: 'Tidak ada deskripsi'}">Event description</p>
+
+            <div class="space-y-2 mb-4 text-sm text-slate-600">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-day text-primary"></i>
+                    <span>Mulai:</span>
+                    <span class="font-semibold" th:text="${event.startDateFormatted != null ? event.startDateFormatted : '-'}">01 Jan 2025 10:00</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-check text-secondary"></i>
+                    <span>Selesai:</span>
+                    <span class="font-semibold" th:text="${event.endDateFormatted != null ? event.endDateFormatted : '-'}">01 Jan 2025 18:00</span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-xs text-slate-500 mb-2">Kandidat:</p>
+                <div class="flex -space-x-2">
+                    <th:block th:if="${event.candidates != null and !#lists.isEmpty(event.candidates)}">
+                        <th:block th:each="candidate, iterStat : ${event.candidates}">
+                            <th:block th:if="${iterStat.index} < 5">
+                                <div th:if="${candidate.photoUrl != null and !#strings.isEmpty(candidate.photoUrl)}"
+                                     class="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+                                    <img th:src="${candidate.photoUrl}" th:alt="${candidate.name}" class="w-full h-full object-cover">
+                                </div>
+                                <div th:unless="${candidate.photoUrl != null and !#strings.isEmpty(candidate.photoUrl)}"
+                                     class="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center font-semibold text-sm"
+                                     th:text="${#strings.substring(candidate.name,0,1).toUpperCase()}">C</div>
+                            </th:block>
+                        </th:block>
+                        <div th:if="${#lists.size(event.candidates) > 5}"
+                             class="w-10 h-10 rounded-full border-2 border-white bg-slate-300 text-slate-700 flex items-center justify-center font-semibold text-xs">
+                            +<span th:text="${#lists.size(event.candidates) - 5}">3</span>
+                        </div>
+                    </th:block>
+                    <div th:if="${event.candidates == null or #lists.isEmpty(event.candidates)}"
+                         class="text-sm text-slate-400">Belum ada kandidat</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-slate-50/80 rounded-xl p-3 text-center">
+                    <p class="text-2xl font-bold text-primary" th:text="${event.candidates != null ? #lists.size(event.candidates) : 0}">0</p>
+                    <p class="text-xs text-slate-600">Kandidat</p>
+                </div>
+                <div class="bg-slate-50/80 rounded-xl p-3 text-center">
+                    <p class="text-2xl font-bold text-secondary"
+                       th:text="${event.totalVotes != null ? event.totalVotes : 0}">0</p>
+                    <p class="text-xs text-slate-600">Total Suara</p>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <a th:href="@{/events/{code}(code=${event.code})}"
+                   class="flex-1 bg-gradient-to-r from-primary to-accent text-white text-center py-2.5 rounded-xl font-semibold shadow hover:shadow-lg transition text-sm">
+                    <i class="fa-solid fa-chart-bar mr-2"></i>
+                    <span>Lihat Detail</span>
+                </a>
+                <a th:href="@{/events/edit/{id}(id=${event.id})}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-primary border-2 border-primary/30 hover:bg-primary/10 transition text-sm">
+                    <i class="fa-solid fa-edit"></i>
+                    <span>Edit</span>
+                </a>
+                <button type="button"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow transition text-sm"
+                        data-delete-button
+                        th:attr="data-event-id=${event.id}, data-event-title=${event.title}">
+                    <i class="fa-solid fa-trash"></i>
+                    <span>Hapus</span>
+                </button>
+            </div>
+
+            <!-- bagian form: menampilkan Kode Event -->
+            <div class="text-sm text-slate-500 mt-4">
+                <p>Kode Event: <span class="font-semibold text-primary" th:text="${event.code}">-</span></p>
+            </div>
+        </article>
+    </section>
+    <section>
+        <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div class="glass rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fa-solid fa-trash text-3xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Hapus Event?</h3>
+                    <p class="text-slate-600">Apakah Anda yakin ingin menghapus event <strong id="deleteEventTitle"></strong>? Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeDeleteModal()" class="flex-1 px-6 py-3 rounded-xl font-semibold text-slate-700 border-2 border-slate-300 hover:bg-slate-100 transition">Batal</button>
+                    <button type="button" onclick="deleteEvent()" class="flex-1 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-br from-red-500 to-red-600 shadow-lg hover:shadow-xl transition">Hapus</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script th:inline="javascript">
+        let deleteEventId = null;
+
+        function confirmDelete(eventId, eventTitle) {
+            deleteEventId = eventId;
+            const titleElement = document.getElementById('deleteEventTitle');
+            if (titleElement) {
+                titleElement.textContent = eventTitle;
+            }
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            deleteEventId = null;
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function deleteEvent() {
+            if (!deleteEventId) {
+                return;
+            }
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/events/${deleteEventId}/delete`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+    document.addEventListener('DOMContentLoaded', () => {
+            const messageBoxes = document.querySelectorAll('.border-l-4');
+            if (messageBoxes.length > 0) {
+                setTimeout(() => {
+                    messageBoxes.forEach((box) => {
+                        box.style.transition = 'opacity 0.5s';
+                        box.style.opacity = '0';
+                        setTimeout(() => box.remove(), 500);
+                    });
+                }, 5000);
+            }
+
+            const menuButtons = document.querySelectorAll('[data-event-menu-button]');
+            const menus = document.querySelectorAll('[data-event-menu]');
+
+            menuButtons.forEach((button) => {
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const menu = button.nextElementSibling;
+                    menus.forEach((other) => {
+                        if (other !== menu) {
+                            other.classList.add('hidden');
+                        }
+                    });
+                    menu.classList.toggle('hidden');
+                });
+            });
+
+            document.addEventListener('click', () => {
+                menus.forEach((menu) => menu.classList.add('hidden'));
+            });
+
+            const modal = document.getElementById('deleteModal');
+            if (modal) {
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeDeleteModal();
+                    }
+                });
+            }
+
+            const deleteButtons = document.querySelectorAll('[data-delete-button]');
+            deleteButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const eventId = button.getAttribute('data-event-id');
+                    const eventTitle = button.getAttribute('data-event-title');
+                    confirmDelete(Number(eventId), eventTitle ?? '');
+                });
+            });
+        });
+    </script>
+</th:block>
+</html>

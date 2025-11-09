@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{dashboard/layout :: layout('Dashboard SI-VOTING', 'manage', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="glass rounded-3xl p-8 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 w-56 h-56 bg-gradient-to-br from-primary/20 to-secondary/40 rounded-full blur-3xl"></div>
+        <div class="absolute -left-10 bottom-0 w-44 h-44 bg-gradient-to-tr from-secondary/30 to-accent/20 rounded-full blur-3xl"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+                <p class="text-sm uppercase tracking-[0.4em] text-primary/70 font-semibold">Manage Event</p>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-primary mt-2">Selamat Datang! 👋</h2>
+                <p class="text-slate-600 mt-3 max-w-xl">Kelola event voting, pantau aktivitas terbaru, dan tindak lanjuti insight penting untuk memastikan partisipasi tetap tinggi.</p>
+            </div>
+            <div class="glass rounded-2xl px-6 py-4 shadow-inner flex items-center gap-3">
+                <div class="text-4xl">📅</div>
+                <div>
+                    <p class="text-xs text-slate-500 uppercase tracking-wide">Hari ini</p>
+                    <p class="text-lg font-bold text-primary" th:text="${#temporals.format(#temporals.createNow(), 'dd MMMM yyyy')}">07 November 2025</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <article class="glass rounded-3xl p-6 shadow-lg border border-white/60"
+            th:with="my=${stats != null && stats.myEvents != null ? stats.myEvents : 0}">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500">My Events</p>
+                    <p class="text-4xl font-extrabold text-primary mt-2" th:text="${my}">0</p>
+                </div>
+                <a href="/my-events" class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent text-white text-xl">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </a>
+            </div>
+            <div class="mt-4 text-sm text-slate-500 space-y-1">
+                <p th:text="${my > 0 ? 'Kelola ' + my + ' event Anda' : 'Belum ada event'}">Belum ada event</p>
+                <p><a href="/create-event" class="text-primary font-semibold">Buat event baru →</a></p>
+            </div>
+        </article>
+
+        <article class="glass rounded-3xl p-6 shadow-lg border border-white/60"
+            th:with="my=${stats != null && stats.myEvents != null ? stats.myEvents : 0}, active=${stats != null && stats.activeEvents != null ? stats.activeEvents : 0}, percent=${my > 0 ? #numbers.formatDecimal((active * 100.0)/my, 0, 0) : '0'}">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500">Active Events</p>
+                    <p class="text-4xl font-extrabold text-secondary mt-2" th:text="${active}">0</p>
+                </div>
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-secondary to-primary text-white text-xl">
+                    <i class="fa-solid fa-fire"></i>
+                </span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm text-slate-500">
+                <p th:text="${my > 0 ? 'Dari ' + my + ' event Anda' : 'Tidak ada event'}">Dari 0 event</p>
+                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full rounded-full bg-secondary" th:style="${'width:' + percent + '%;'}"></div>
+                </div>
+                <p th:text="${percent + '% dari event aktif'}">0% aktif</p>
+            </div>
+        </article>
+
+        <article class="glass rounded-3xl p-6 shadow-lg border border-white/60"
+            th:with="pr=${stats != null && stats.participationRate != null ? stats.participationRate : 0}">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500">Participation Rate</p>
+                    <p class="text-4xl font-extrabold text-sky-500 mt-2" th:text="${pr + '%'}">0%</p>
+                </div>
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-400 text-white text-xl">
+                    <i class="fa-solid fa-chart-line"></i>
+                </span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm text-slate-500">
+                <p th:text="${pr > 0 ? 'Rata-rata event Anda mendapatkan suara' : 'Belum ada suara pada event Anda'}">Belum ada suara</p>
+                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full rounded-full bg-sky-400" th:style="${'width:' + pr + '%;'}"></div>
+                </div>
+                <p th:text="${pr + '% rata-rata partisipasi'}">0% rata-rata</p>
+            </div>
+        </article>
+
+        <article class="glass rounded-3xl p-6 shadow-lg border border-white/60"
+            th:with="actCount=${activities != null ? #lists.size(activities) : 0}">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500">Recent Activity</p>
+                    <p class="text-4xl font-extrabold text-amber-500 mt-2" th:text="${actCount}">0</p>
+                </div>
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-400 text-white text-xl">
+                    <i class="fa-solid fa-bolt"></i>
+                </span>
+            </div>
+            <div class="mt-4 space-y-3 text-sm text-slate-500">
+                <p th:text="${actCount > 0 ? actCount + ' aktivitas terbaru' : 'Belum ada aktivitas'}">Belum ada aktivitas</p>
+                <p><a href="/activity" class="text-primary font-semibold">Lihat aktivitas →</a></p>
+            </div>
+        </article>
+    </section>
+
+    <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="glass rounded-3xl p-6 shadow-lg border border-white/60 space-y-4 xl:col-span-2">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-primary">Aktivitas Terbaru</h3>
+                <a href="/activity" class="text-sm font-semibold text-primary hover:text-accent transition">Lihat semua →</a>
+            </div>
+            <div class="space-y-4">
+                <div th:if="${activities == null or #lists.isEmpty(activities)}" class="text-center text-slate-500 py-8">
+                    <i class="fa-solid fa-inbox text-4xl text-slate-300 mb-3"></i>
+                    <p>Belum ada aktivitas</p>
+                </div>
+
+                <div th:each="activity : ${activities}" class="flex items-start gap-4 border border-slate-100 rounded-2xl p-4 hover:shadow-md transition"
+                    th:with="lowerMessage=${activity.message != null ? activity.message.toLowerCase() : ''},
+                        type=${lowerMessage.contains('vote') ? 'Voting' : (lowerMessage.contains('hapus') or lowerMessage.contains('delete') ? 'Hapus Event' : (lowerMessage.contains('event baru') or lowerMessage.contains('create') ? 'Buat Event' : (lowerMessage.contains('mulai') or lowerMessage.contains('dimulai') ? 'Mulai Event' : (lowerMessage.contains('selesai') ? 'Event Selesai' : 'Aktivitas'))))},
+                        badgeClass=${type == 'Voting' ? ' bg-emerald-100 text-emerald-600' : (type == 'Buat Event' ? ' bg-sky-100 text-sky-600' : (type == 'Hapus Event' ? ' bg-rose-100 text-rose-600' : (type == 'Mulai Event' ? ' bg-indigo-100 text-indigo-600' : (type == 'Event Selesai' ? ' bg-slate-100 text-slate-600' : ' bg-amber-100 text-amber-600'))))},
+                        icon=${activity.type == 'VOTED' ? '✅' : (activity.type == 'EVENT_CREATED' ? '🆕' : (activity.type == 'EVENT_DELETED' ? '🗑️' : 'ℹ️'))}">
+                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
+                        th:classappend="${type == 'Voting' ? ' bg-emerald-50 text-emerald-600' : (type == 'Buat Event' ? ' bg-sky-50 text-sky-600' : (type == 'Hapus Event' ? ' bg-rose-50 text-rose-600' : (type == 'Mulai Event' ? ' bg-indigo-50 text-indigo-600' : (type == 'Event Selesai' ? ' bg-slate-50 text-slate-600' : ' bg-amber-50 text-amber-600'))))}">
+                        <span th:text="${icon}">✅</span>
+                    </span>
+                    <div class="flex-1"
+                        th:with="timestampAvailable=${activity.timestamp != null}, formattedTimestamp=${timestampAvailable ? #temporals.format(activity.timestamp, 'dd MMM yyyy HH:mm') : ''},
+                            description=${activity.eventTitle != null ? activity.eventTitle : (activity.candidateName != null ? activity.candidateName : activity.message)}">
+                        <div class="flex items-start justify-between gap-3">
+                            <p class="font-semibold text-slate-700" th:text="${activity.message}">Activity title</p>
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full"
+                                th:classappend="${badgeClass}" th:text="${type}">Aktivitas</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-1" th:text="${description}">Activity description</p>
+                        <div class="flex items-center justify-between text-xs text-slate-400 mt-2">
+                            <span th:if="${timestampAvailable}" th:text="${formattedTimestamp}">09 Nov 2025 10:00</span>
+                            <span th:text="${''}">-- lalu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass rounded-3xl p-6 shadow-lg border border-white/60 space-y-4">
+            <h3 class="text-xl font-bold text-primary">Aksi Cepat</h3>
+            <button onclick="window.location.href='/create-event'" class="w-full bg-gradient-to-br from-primary to-accent text-white font-semibold rounded-2xl py-5 px-6 flex items-center justify-between shadow-lg hover:shadow-xl hover:scale-[1.01] transition">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg"><i class="fa-solid fa-plus"></i></span>
+                    <span>Buat Event Baru</span>
+                </div>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button onclick="window.location.href='/my-events'" class="w-full bg-gradient-to-br from-secondary to-lime-400 text-white font-semibold rounded-2xl py-5 px-6 flex items-center justify-between shadow-lg hover:shadow-xl hover:scale-[1.01] transition">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar"></i></span>
+                    <span>Event Saya</span>
+                </div>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button onclick="window.location.href='/dashboard/settings'" class="w-full bg-gradient-to-br from-sky-400 to-cyan-400 text-white font-semibold rounded-2xl py-5 px-6 flex items-center justify-between shadow-lg hover:shadow-xl hover:scale-[1.01] transition">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg"><i class="fa-solid fa-gear"></i></span>
+                    <span>Pengaturan</span>
+                </div>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </section>
+</th:block>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{dashboard/layout :: layout('Buat Event - SI-VOTING', 'my-events', ~{::content})}">
+<th:block th:fragment="content">
+    <section class="glass rounded-3xl p-8 shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+                <p class="text-sm uppercase tracking-[0.4em] text-primary/70 font-semibold">Event Baru</p>
+                <h1 class="mt-2 text-3xl md:text-4xl font-bold text-primary">Buat Event Voting</h1>
+                <p class="mt-3 text-slate-600 max-w-2xl">Lengkapi detail event untuk mulai mengumpulkan suara. Kamu dapat menambahkan kandidat kapan pun sebelum event dimulai.</p>
+            </div>
+            <a href="/dashboard" class="inline-flex items-center gap-2 rounded-2xl border border-primary/30 px-5 py-3 text-sm font-semibold text-primary hover:bg-primary/10 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Kembali ke Dashboard</span>
+            </a>
+        </div>
+    </section>
+
+    <div th:if="${success}" class="glass rounded-2xl p-4 border-l-4 border-green-500 bg-green-50/50">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-check-circle text-green-600 text-xl"></i>
+            <p class="text-green-800 font-semibold" th:text="${success}">Berhasil</p>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="glass rounded-2xl p-4 border-l-4 border-red-500 bg-red-50/50">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-exclamation-circle text-red-600 text-xl"></i>
+            <p class="text-red-800 font-semibold" th:text="${error}">Gagal</p>
+        </div>
+    </div>
+
+    <form th:action="@{/events}" method="post" class="glass rounded-3xl p-8 shadow-xl space-y-10" id="createEventForm">
+        <section class="space-y-6">
+            <h2 class="flex items-center gap-3 text-xl font-bold text-primary">
+                <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent text-white"><i class="fa-solid fa-file-lines"></i></span>
+                Informasi Event
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <label class="flex flex-col gap-2 text-sm font-semibold text-slate-600">
+                    Judul Event
+                    <input name="title" type="text" required placeholder="Contoh: Pemilihan Ketua OSIS 2025" class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-base font-normal text-slate-700 shadow-inner focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </label>
+                <label class="flex flex-col gap-2 text-sm font-semibold text-slate-600">
+                    Publik / Privat
+                    <select name="isPublic" class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-base font-normal text-slate-700 shadow-inner focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <option value="true">Publik (siapa pun dapat melihat dan ikut)</option>
+                        <option value="false">Privat (hanya undangan)</option>
+                    </select>
+                </label>
+                <label class="flex flex-col gap-2 text-sm font-semibold text-slate-600">
+                    Dimulai
+                    <input name="startDate" type="datetime-local" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-base font-normal text-slate-700 shadow-inner focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </label>
+                <label class="flex flex-col gap-2 text-sm font-semibold text-slate-600">
+                    Berakhir
+                    <input name="endDate" type="datetime-local" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-base font-normal text-slate-700 shadow-inner focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </label>
+            </div>
+            <label class="flex flex-col gap-2 text-sm font-semibold text-slate-600">
+                Deskripsi Event
+                <textarea name="description" rows="4" placeholder="Ceritakan tujuan event, jadwal, dan aturan voting" class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-base font-normal text-slate-700 shadow-inner focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+            </label>
+            <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/50 p-4 md:flex-row md:items-center md:justify-between">
+                <div class="flex items-center gap-3 text-sm text-slate-600">
+                    <input id="isActive" name="isActive" type="checkbox" value="true" checked class="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary/40">
+                    <label for="isActive" class="select-none">Aktifkan event setelah disimpan</label>
+                </div>
+                <p class="text-xs text-slate-400">Nonaktifkan jika ingin menyiapkan event terlebih dahulu sebelum diluncurkan.</p>
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="flex items-center gap-3 text-xl font-bold text-primary">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary to-primary text-white"><i class="fa-solid fa-users"></i></span>
+                        Daftar Kandidat
+                    </h2>
+                    <p class="mt-2 text-sm text-slate-500">Minimal tambah dua kandidat agar pemilih memiliki pilihan. Kamu bisa menambahkan lagi setelah event dibuat.</p>
+                </div>
+                <button type="button" id="addCandidate" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl transition hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    Tambah Kandidat
+                </button>
+            </div>
+
+            <div id="candidateList" class="grid grid-cols-1 gap-4"></div>
+            <div id="candidateFields" class="hidden"></div>
+        </section>
+
+        <div class="flex flex-col-reverse gap-4 md:flex-row md:items-center md:justify-between">
+            <p class="text-xs text-slate-400">Dengan menekan tombol simpan, kamu menyetujui aturan SI-VOTING dan bertanggung jawab atas keaslian kandidat.</p>
+            <button type="submit" class="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary to-accent px-6 py-3 text-base font-semibold text-white shadow-lg hover:shadow-xl transition">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Simpan Event
+            </button>
+        </div>
+    </form>
+
+    <template id="candidateCardTemplate">
+        <article class="candidate-card glass relative rounded-3xl border border-white/60 p-6 shadow-lg transition hover:shadow-xl">
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="candidate-photo-wrapper hidden flex-shrink-0">
+                    <div class="candidate-photo overflow-hidden rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 shadow-inner">
+                        <img src="" alt="" class="candidate-photo-img h-48 w-full md:h-full md:w-48 object-cover">
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col gap-4">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="candidate-number inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent text-white font-bold text-lg shadow-lg"></span>
+                            <div>
+                                <h3 class="candidate-name text-xl font-bold text-slate-800"></h3>
+                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">Kandidat</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="edit-candidate inline-flex items-center gap-2 rounded-full bg-white border border-primary/30 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary hover:text-white transition shadow-sm" title="Edit kandidat">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span class="hidden sm:inline">Edit</span>
+                            </button>
+                            <button type="button" class="remove-candidate inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 border border-slate-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition shadow-sm" title="Hapus kandidat">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="candidate-description text-sm leading-relaxed text-slate-600 line-clamp-3"></p>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <div id="candidateModal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-10 overflow-y-auto">
+        <div id="candidateModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"></div>
+        <div class="relative z-10 w-full max-w-2xl my-8 animate-fade-in">
+            <form id="candidateForm" class="glass rounded-3xl border border-white/50 p-8 shadow-2xl transform transition-all">
+                <div class="flex items-start justify-between gap-4 pb-6 border-b border-slate-200/50">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent shadow-lg">
+                            <i class="fa-solid fa-user-plus text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-primary/70">Form Kandidat</p>
+                            <h3 id="candidateModalTitle" class="mt-1 text-2xl font-bold text-primary">Tambah Kandidat</h3>
+                        </div>
+                    </div>
+                    <button type="button" id="closeCandidateModal" class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 shadow hover:bg-slate-50 hover:text-slate-600 transition" title="Tutup">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="mt-6 space-y-5">
+                    <div>
+                        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-user text-primary"></i>
+                            Nama Kandidat <span class="text-red-500">*</span>
+                        </label>
+                        <input id="modalCandidateName" type="text" required placeholder="Contoh: Budi Santoso" class="w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 text-base font-normal text-slate-700 shadow-sm transition focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 hover:border-slate-300">
+                    </div>
+
+                    <div>
+                        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-image text-primary"></i>
+                            Foto Kandidat
+                        </label>
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <input type="file" id="modalCandidatePhotoFile" accept="image/*" class="hidden">
+                                <button type="button" id="uploadPhotoBtn" class="w-full rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-500 transition hover:border-primary hover:text-primary">
+                                    <i class="fa-solid fa-upload mr-2"></i>Upload Foto Kandidat
+                                </button>
+                                <p class="mt-2 text-xs text-slate-400 text-center">Format JPG/PNG, ukuran maks 5MB</p>
+                            </div>
+
+                            <div id="photoPreviewContainer" class="hidden rounded-2xl border border-slate-200 bg-white/80 p-4 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-16 h-16 rounded-xl overflow-hidden border border-slate-200">
+                                        <img id="photoPreviewImg" src="" alt="Preview" class="w-full h-full object-cover">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-700">Foto kandidat ter-upload</p>
+                                        <p class="text-xs text-slate-400" id="uploadedFileName">uploaded-file.jpg</p>
+                                    </div>
+                                </div>
+                                <button type="button" id="removePhotoBtn" class="rounded-full bg-red-50 text-red-500 px-3 py-2 text-xs font-semibold hover:bg-red-100 transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                    <span class="ml-1">Hapus</span>
+                                </button>
+                            </div>
+
+                            <div id="uploadProgress" class="hidden">
+                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div id="uploadProgressBar" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <p class="mt-2 text-xs text-slate-400 text-center">Mengupload...</p>
+                            </div>
+
+                            <input type="hidden" id="modalCandidatePhoto" value="">
+                        </div>
+                        <p class="mt-2 text-xs text-slate-400">Upload foto kandidat (opsional)</p>
+                    </div>
+
+                    <div>
+                        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-align-left text-primary"></i>
+                            Deskripsi / Visi Misi
+                        </label>
+                        <textarea id="modalCandidateDescription" rows="5" placeholder="Jelaskan visi, misi, atau profil singkat kandidat..." class="w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3 text-base font-normal text-slate-700 shadow-sm transition focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 hover:border-slate-300 resize-none"></textarea>
+                        <div class="flex items-center justify-between mt-2">
+                            <p class="text-xs text-slate-400">Jelaskan latar belakang dan program kandidat</p>
+                            <p id="descriptionCounter" class="text-xs font-semibold text-slate-400">0 karakter</p>
+                        </div>
+                    </div>
+
+                    <div id="candidateError" class="hidden rounded-2xl bg-red-50 border-2 border-red-200 px-4 py-3 flex items-center gap-3">
+                        <i class="fa-solid fa-circle-exclamation text-red-500 text-lg"></i>
+                        <p class="text-sm font-semibold text-red-600"></p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-slate-200/50">
+                    <button type="button" id="cancelCandidate" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border-2 border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
+                        <i class="fa-solid fa-xmark"></i>
+                        Batal
+                    </button>
+                    <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-primary to-accent px-8 py-3 text-sm font-semibold text-white shadow-lg transition hover:shadow-xl hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-check"></i>
+                        Simpan Kandidat
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.2s ease-out;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        const eventForm = document.querySelector('form');
+        const candidateList = document.getElementById('candidateList');
+        const candidateFields = document.getElementById('candidateFields');
+        const addCandidateBtn = document.getElementById('addCandidate');
+        const candidateModal = document.getElementById('candidateModal');
+        const candidateModalOverlay = document.getElementById('candidateModalOverlay');
+        const candidateForm = document.getElementById('candidateForm');
+        const candidateModalTitle = document.getElementById('candidateModalTitle');
+        const closeCandidateModal = document.getElementById('closeCandidateModal');
+        const cancelCandidateBtn = document.getElementById('cancelCandidate');
+        const nameInput = document.getElementById('modalCandidateName');
+        const photoInput = document.getElementById('modalCandidatePhoto');
+        const photoFileInput = document.getElementById('modalCandidatePhotoFile');
+        const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+        const photoPreviewContainer = document.getElementById('photoPreviewContainer');
+        const photoPreviewImg = document.getElementById('photoPreviewImg');
+        const uploadedFileName = document.getElementById('uploadedFileName');
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadProgressBar = document.getElementById('uploadProgressBar');
+        const descriptionInput = document.getElementById('modalCandidateDescription');
+        const candidateError = document.getElementById('candidateError');
+        const candidateCardTemplate = document.getElementById('candidateCardTemplate');
+        const descriptionCounter = document.getElementById('descriptionCounter');
+
+        const candidates = [];
+        let editingIndex = null;
+
+        descriptionInput.addEventListener('input', () => {
+            const length = descriptionInput.value.length;
+            descriptionCounter.textContent = `${length} karakter`;
+        });
+
+        uploadPhotoBtn.addEventListener('click', () => {
+            photoFileInput.click();
+        });
+
+        photoFileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert('Hanya file gambar yang diperbolehkan');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran file maksimal 5MB');
+                return;
+            }
+
+            uploadProgress.classList.remove('hidden');
+            uploadProgressBar.style.width = '0%';
+
+            try {
+                const token = /*[[${session.token}]]*/ '';
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('http://localhost:8080/api/files/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Upload gagal');
+                }
+
+                const result = await response.json();
+                uploadProgressBar.style.width = '100%';
+
+                setTimeout(() => {
+                    uploadProgress.classList.add('hidden');
+
+                    if (result.success && result.data) {
+                        const photoUrl = result.data.url;
+                        photoInput.value = photoUrl;
+                        photoPreviewImg.src = photoUrl;
+                        uploadedFileName.textContent = result.data.originalFilename;
+                        photoPreviewContainer.classList.remove('hidden');
+                    }
+                }, 300);
+            } catch (error) {
+                console.error('Upload error:', error);
+                uploadProgress.classList.add('hidden');
+                alert('Gagal mengupload foto: ' + error.message);
+            }
+        });
+
+        removePhotoBtn.addEventListener('click', () => {
+            photoInput.value = '';
+            photoPreviewImg.src = '';
+            photoPreviewContainer.classList.add('hidden');
+            photoFileInput.value = '';
+        });
+
+        const toggleBodyScroll = (lock) => {
+            document.body.style.overflow = lock ? 'hidden' : '';
+        };
+
+        const openModal = (index = null) => {
+            editingIndex = index;
+            candidateForm.reset();
+            candidateError.classList.add('hidden');
+            photoPreviewContainer.classList.add('hidden');
+            photoInput.value = '';
+            photoFileInput.value = '';
+            uploadProgress.classList.add('hidden');
+            descriptionCounter.textContent = '0 karakter';
+
+            if (index !== null) {
+                const candidate = candidates[index];
+                candidateModalTitle.textContent = 'Edit Kandidat';
+                nameInput.value = candidate.name;
+                photoInput.value = candidate.photoUrl || '';
+                descriptionInput.value = candidate.description || '';
+                descriptionCounter.textContent = `${candidate.description?.length || 0} karakter`;
+
+                if (candidate.photoUrl) {
+                    photoPreviewImg.src = candidate.photoUrl;
+                    uploadedFileName.textContent = 'Foto kandidat';
+                    photoPreviewContainer.classList.remove('hidden');
+                }
+            } else {
+                candidateModalTitle.textContent = 'Tambah Kandidat';
+            }
+
+            candidateModal.classList.remove('hidden');
+            candidateModal.classList.add('flex');
+            candidateModal.setAttribute('aria-hidden', 'false');
+            toggleBodyScroll(true);
+            setTimeout(() => nameInput.focus(), 100);
+        };
+
+        const closeModal = () => {
+            candidateModal.classList.add('hidden');
+            candidateModal.classList.remove('flex');
+            candidateModal.setAttribute('aria-hidden', 'true');
+            candidateForm.reset();
+            candidateError.classList.add('hidden');
+            photoPreviewContainer.classList.add('hidden');
+            photoInput.value = '';
+            photoFileInput.value = '';
+            uploadProgress.classList.add('hidden');
+            descriptionCounter.textContent = '0 karakter';
+            editingIndex = null;
+            toggleBodyScroll(false);
+        };
+
+        const buildHiddenFields = () => {
+            candidateFields.innerHTML = '';
+            candidates.forEach((candidate, index) => {
+                const fieldValues = {
+                    name: candidate.name,
+                    photoUrl: candidate.photoUrl || '',
+                    description: candidate.description || ''
+                };
+                Object.entries(fieldValues).forEach(([key, value]) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `candidates[${index}].${key}`;
+                    input.value = value;
+                    candidateFields.appendChild(input);
+                });
+            });
+        };
+
+        const renderCandidates = () => {
+            candidateList.innerHTML = '';
+            if (candidates.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'rounded-3xl border-2 border-dashed border-slate-300 bg-white/70 p-12 text-center';
+                emptyState.innerHTML = `
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-300">
+                            <i class="fa-solid fa-users text-3xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-base font-semibold text-slate-500">Belum ada kandidat</p>
+                            <p class="mt-1 text-sm text-slate-400">Tekan tombol \"Tambah Kandidat\" untuk mulai menambahkan</p>
+                        </div>
+                    </div>`;
+                candidateList.appendChild(emptyState);
+            } else {
+                candidates.forEach((candidate, index) => {
+                    const fragment = candidateCardTemplate.content.cloneNode(true);
+                    const article = fragment.querySelector('.candidate-card');
+                    article.dataset.index = index;
+
+                    const numberEl = article.querySelector('.candidate-number');
+                    numberEl.textContent = `${index + 1}`;
+
+                    const nameEl = article.querySelector('.candidate-name');
+                    nameEl.textContent = candidate.name;
+
+                    const descriptionEl = article.querySelector('.candidate-description');
+                    descriptionEl.textContent = candidate.description ? candidate.description : 'Belum ada deskripsi untuk kandidat ini.';
+
+                    const photoWrapper = article.querySelector('.candidate-photo-wrapper');
+                    const photoImg = article.querySelector('.candidate-photo-img');
+                    if (candidate.photoUrl) {
+                        photoWrapper.classList.remove('hidden');
+                        photoImg.src = candidate.photoUrl;
+                        photoImg.alt = `Foto ${candidate.name}`;
+                    } else {
+                        photoWrapper.classList.add('hidden');
+                        photoImg.src = '';
+                        photoImg.alt = '';
+                    }
+
+                    const editButton = article.querySelector('.edit-candidate');
+                    editButton.addEventListener('click', () => openModal(index));
+
+                    const removeButton = article.querySelector('.remove-candidate');
+                    removeButton.addEventListener('click', () => {
+                        if (candidates.length <= 2) {
+                            return;
+                        }
+                        if (confirm(`Hapus kandidat "${candidate.name}"?`)) {
+                            candidates.splice(index, 1);
+                            renderCandidates();
+                        }
+                    });
+
+                    if (candidates.length <= 2) {
+                        removeButton.disabled = true;
+                        removeButton.classList.add('opacity-40', 'cursor-not-allowed');
+                        removeButton.title = 'Minimal 2 kandidat diperlukan';
+                    } else {
+                        removeButton.disabled = false;
+                        removeButton.classList.remove('opacity-40', 'cursor-not-allowed');
+                        removeButton.title = 'Hapus kandidat';
+                    }
+
+                    candidateList.appendChild(fragment);
+                });
+            }
+            buildHiddenFields();
+        };
+
+        addCandidateBtn.addEventListener('click', () => openModal());
+        cancelCandidateBtn.addEventListener('click', closeModal);
+        closeCandidateModal.addEventListener('click', closeModal);
+        candidateModalOverlay.addEventListener('click', closeModal);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !candidateModal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        candidateForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const name = nameInput.value.trim();
+            const photoUrl = photoInput.value.trim();
+            const description = descriptionInput.value.trim();
+
+            if (!name) {
+                const errorText = candidateError.querySelector('p');
+                errorText.textContent = 'Nama kandidat wajib diisi.';
+                candidateError.classList.remove('hidden');
+                nameInput.focus();
+                return;
+            }
+
+            const candidateData = { name, photoUrl, description };
+
+            if (editingIndex !== null) {
+                candidates[editingIndex] = candidateData;
+            } else {
+                candidates.push(candidateData);
+            }
+
+            renderCandidates();
+            closeModal();
+        });
+
+        eventForm.addEventListener('submit', (event) => {
+            if (candidates.length < 2) {
+                event.preventDefault();
+                const errorText = candidateError.querySelector('p');
+                errorText.textContent = 'Minimal dua kandidat diperlukan sebelum menyimpan event.';
+                candidateError.classList.remove('hidden');
+                openModal();
+            }
+        });
+
+        renderCandidates();
+    </script>
+</th:block>
+</html>

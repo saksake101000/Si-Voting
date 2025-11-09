@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(pageTitle, activePage, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Deployment-time API base: set this meta tag in your static HTML or via Thymeleaf variable
+        Example: <meta name="api-base" content="https://api.example.com/api"> -->
+    <meta name="api-base" th:if="${apiBase}" th:content="${apiBase}" />
+    <!-- Fallback: read API_BASE from environment if not provided via model (useful when running in container) -->
+    <meta name="api-base" th:if="${apiBase} == null" th:content="${@environment.getProperty('API_BASE')}" />
+    <title th:text="${pageTitle}">Dashboard SI-VOTING</title>
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Nunito", "sans-serif"],
+                        logo: ["Darumadrop One", "cursive"],
+                    },
+                    colors: {
+                        primary: "#006d57",
+                        secondary: "#b2bc39",
+                        accent: "#00ab87",
+                    },
+                },
+            },
+        };
+    </script>
+    <script src="https://kit.fontawesome.com/9f52d742de.js" crossorigin="anonymous"></script>
+    <style>
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at 15% 30%, rgba(0, 173, 135, 0.12), transparent 55%),
+                radial-gradient(circle at 85% 20%, rgba(178, 188, 57, 0.18), transparent 60%),
+                radial-gradient(circle at 50% 75%, rgba(0, 109, 87, 0.12), transparent 55%),
+                linear-gradient(135deg, #f0fdf4, #e0f7f2 45%, #f7f8e8 100%);
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-slate-800">
+<div class="flex min-h-screen">
+    <th:block th:replace="~{dashboard/sidebar :: sidebar(${activePage})}"></th:block>
+
+    <div class="flex-1 flex flex-col lg:ml-0">
+        <th:block th:replace="~{dashboard/header :: header}"></th:block>
+
+        <main class="flex-1 px-6 md:px-10 py-10 space-y-8">
+            <th:block th:replace="${content}"></th:block>
+        </main>
+    </div>
+</div>
+
+<script>
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+
+    if (sidebar && sidebarToggle) {
+        sidebarToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("-translate-x-full");
+        });
+        sidebar.addEventListener("click", (event) => {
+            if (window.innerWidth < 1024 && event.target === sidebar) {
+                sidebar.classList.add("-translate-x-full");
+            }
+        });
+    }
+</script>
+<!-- Load WebSocket libs and application JS (app expects these under /js) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script th:src="@{/js/api.js}"></script>
+<script th:src="@{/js/utils.js}"></script>
+<script th:src="@{/js/websocket.js}"></script>
+</body>
+</html>

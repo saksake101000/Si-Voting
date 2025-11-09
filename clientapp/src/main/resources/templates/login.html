@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Masuk - SI-VOTING Style</title>
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        .color-primary { background-color: #48bb78; } 
+        .color-primary-text { color: #48bb78; }
+        .color-secondary { background-color: #f6e05e; } 
+        .shadow-voting { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05); }
+        .input-focus:focus {
+            border-color: #48bb78;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="bg-white p-8 md:p-10 rounded-2xl shadow-voting w-full max-w-sm transition-transform duration-300 hover:scale-[1.01]">
+        
+        <div class="text-center mb-8">
+            <div class="text-3xl font-bold color-primary-text mb-1">
+                SI-VOTING
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">
+                Masuk ke Akun Anda
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Masukkan detail Anda untuk melanjutkan.
+            </p>
+        </div>
+
+        <div th:if="${error}" class="mb-6 rounded-lg bg-red-50 border-2 border-red-200 px-4 py-3 flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-red-800" th:text="${error}">Error message</p>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="mb-6 rounded-lg bg-green-50 border-2 border-green-200 px-4 py-3 flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-green-800" th:text="${success}">Success message</p>
+            </div>
+        </div>
+
+        <div id="googleError" class="mb-6 hidden rounded-lg bg-red-50 border-2 border-red-200 px-4 py-3 flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-red-800">Gagal login menggunakan Google.</p>
+            </div>
+        </div>
+
+        
+        <form th:action="@{/login}" method="post" class="space-y-4" id="loginForm">
+            
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                    Username
+                </label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Masukkan username Anda"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 input-focus transition duration-150 ease-in-out" />
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                </label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Sandi rahasia"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 input-focus transition duration-150 ease-in-out" />
+            </div>
+            
+            <div class="pt-2">
+                <button type="submit" id="loginBtn"
+                class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-base font-semibold text-white color-primary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btnText">Masuk</span>
+                    <span id="btnLoading" class="ml-2 hidden">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+                <div th:if="${googleClientId}" class="mb-6 mt-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="flex-1 h-px bg-gray-200"></span>
+                <span class="text-xs uppercase tracking-wide text-gray-400">atau</span>
+                <span class="flex-1 h-px bg-gray-200"></span>
+            </div>
+            <div id="googleSignInContainer"
+                 class="flex justify-center"
+                 th:attr="data-client-id=${googleClientId}"></div>
+        </div>
+
+        <script>
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            const googleErrorBox = document.getElementById('googleError');
+            const googleContainer = document.getElementById('googleSignInContainer');
+
+            loginForm.addEventListener('submit', function() {
+                loginBtn.disabled = true;
+                btnText.textContent = 'Masuk...';
+                btnLoading.classList.remove('hidden');
+            });
+            
+            // Auto-hide messages after 5 seconds
+            window.addEventListener('DOMContentLoaded', function() {
+                const messages = Array.from(document.querySelectorAll('.bg-red-50, .bg-green-50'))
+                .filter(msg => !msg.classList.contains('hidden'));
+                messages.forEach(msg => {
+                    setTimeout(() => {
+                        msg.style.transition = 'opacity 0.5s';
+                        msg.style.opacity = '0';
+                        setTimeout(() => msg.remove(), 500);
+                    }, 5000);
+                });
+            });
+
+            function showGoogleError(message) {
+                if (!googleErrorBox) {
+                    return;
+                }
+                googleErrorBox.style.opacity = '1';
+                googleErrorBox.classList.remove('hidden');
+                const textElement = googleErrorBox.querySelector('p');
+                if (textElement) {
+                    textElement.textContent = message;
+                }
+                setTimeout(() => {
+                    googleErrorBox.style.transition = 'opacity 0.5s';
+                    googleErrorBox.style.opacity = '0';
+                    setTimeout(() => {
+                        googleErrorBox.classList.add('hidden');
+                        googleErrorBox.style.opacity = '1';
+                    }, 500);
+                }, 5000);
+            }
+            
+            async function handleGoogleCredential(response) {
+                if (!response || !response.credential) {
+                    showGoogleError('Kredensial Google tidak valid.');
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/login/google', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ credential: response.credential })
+                    });
+
+                    const payload = await res.json();
+
+                    if (payload.success) {
+                        window.location.href = payload.redirectUrl || '/dashboard';
+                    } else {
+                        showGoogleError(payload.message || 'Gagal login menggunakan Google.');
+                    }
+                } catch (error) {
+                    console.error('Google login error', error);
+                    showGoogleError('Terjadi kesalahan saat menghubungi server.');
+                }
+            }
+
+            let googleInitAttempts = 0;
+            const MAX_GOOGLE_INIT_ATTEMPTS = 10;
+
+            function initGoogleSignIn() {
+                if (!googleContainer) {
+                    return;
+                }
+
+                const clientId = googleContainer.dataset.clientId;
+
+                if (!clientId) {
+                    console.warn('Google Client ID belum dikonfigurasi.');
+                    return;
+                }
+
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.initialize({
+                        client_id: clientId,
+                        callback: handleGoogleCredential,
+                        cancel_on_tap_outside: false
+                    });
+
+                    window.google.accounts.id.renderButton(googleContainer, {
+                        theme: 'outline',
+                        size: 'large',
+                        width: '100%'
+                    });
+                } else {
+                    console.warn('Google Identity Services belum siap.');
+                    if (googleInitAttempts < MAX_GOOGLE_INIT_ATTEMPTS) {
+                        googleInitAttempts += 1;
+                        setTimeout(initGoogleSignIn, 300);
+                    }
+                }
+            }
+
+            window.addEventListener('load', initGoogleSignIn);
+        </script>
+        
+        <p class="mt-6 text-center text-sm">
+            Belum punya akun? 
+            <a th:href="@{/register}" class="font-semibold color-primary-text hover:text-green-600 transition duration-150 ease-in-out">
+                Daftar Akun Baru
+            </a>
+        </p>
+    </div>
+</body>
+</html>
